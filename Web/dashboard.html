@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogPostService</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e6e6e6;
+        }
+        header {
+            padding: 30px 4% 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            z-index: 1000; /* Ensure header is on top of other content */
+        }
+        .h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+        }
+        a {	
+            text-decoration: none;
+            color: #4b4b4b;
+        }
+        nav {
+            margin-left: auto; /* Align nav to the right */
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0; /* Remove default padding */
+            display: flex;
+        }
+        li {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .SelectNav {
+            font-size: large;
+        }
+        main {
+            color: black;
+            max-width: 1020px;
+            margin-top: 100px; /* Adjust margin top to avoid overlap with header */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+        }
+        p{
+            font-size: large;
+        }
+        .text{
+            display: flex;
+        }
+        .img{
+            width: 500px;
+            height: 250px;
+        }
+        .select{
+            color: #4b4b4b;
+        }
+        .list{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="title h1">
+            <a href="/" class="title">
+                BlogPostService
+            </a>
+        </h1>
+        <nav class="SelectNav">
+            <ul>
+                <li>
+                    <a class="SelectNav"></a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="menu">
+            <div>
+                <h1 class="select" title="POST">ブログを投稿する</h1>
+                <h1 class="select" title="READ">記事一覧を見る</h1>
+                <h1 class="select" title="EDIT 現在作成中...">記事を編集する</h1>
+            </div>
+        </div>
+        <div class="post" style="display: none;">
+            <div style="display: flex;">
+                <div>
+                    <label for="title">Title: </label>
+                    <input type="text" name="title" id="title"><br>
+                    <h2>本文</h2>
+                    <textarea name="text" id="text" cols="30" rows="10"></textarea>
+                    <button class="POST">投稿</button>
+                </div>
+                <div id="view">
+                    <h1 class="viewTitle"></h1>
+                    <p class="viewText"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="list"></div>
+    </main>
+
+
+
+    <script>
+        const name = document.querySelectorAll(".SelectNav")[0];
+        const menu = document.querySelectorAll(".menu")[0];
+        const post = document.querySelectorAll(".select")[0];
+        const read = document.querySelectorAll(".select")[1];
+        const title = document.querySelector("#title");
+        const text = document.querySelector("#text");
+        const POST_BUTTON = document.querySelectorAll(".POST")[0];
+        const view = document.querySelector("#view");
+        const list = document.querySelectorAll(".list")[0];
+        const xhr = new XMLHttpRequest();
+        let ip;
+        let res = {};
+        let info;
+
+        const script = document.createElement('script');
+        script.src = 'https://ipinfo.io?callback=callback';
+        document.body.appendChild(script);
+        document.body.removeChild(script);
+        function callback(data) {
+            ip = String(data.ip);
+            for (let i=0; i<3; i++){
+                console.log(i);
+                ip = ip.replace(".", "-");
+            }
+            console.log(ip);
+            let url = `https://${location.host}/authentication?ip=${ip}`;
+            console.log(url);
+            xhr.open("GET", url);
+            xhr.send();
+
+            xhr.onloadend = function (){
+                if (xhr.responseText == "false"){
+                    alert("Loginしなおしてください");
+                    location.href = `https://${location.host}/LoginPage`
+                }else{
+                    res = JSON.parse(xhr.responseText);
+                    console.log(JSON.stringify(res));
+                    name.innerText = res.name;
+                }
+                main();
+            }
+        }
+        function main(){
+            menu.style = "display: flex";
+        }
+
+        post.addEventListener("click", () =>{
+            menu.style = "display: none";
+            document.querySelectorAll(".post")[0].style = "display: flex";
+        });
+        
+        title.addEventListener("input", () =>{
+            document.querySelectorAll(".viewTitle")[0].innerText = title.value;
+        });
+        
+        text.addEventListener("input", () =>{
+            document.querySelectorAll(".viewText")[0].innerText = text.value;
+        });
+        
+        POST_BUTTON.addEventListener("click", () =>{
+            let url = `https://${location.host}/post?mail=${res.mail}&title=${title.value}&text=${text.value.replace("\n", "<br>")}`;
+            console.log(url);
+            xhr.open("GET", url);
+            xhr.send();
+            
+            xhr.onloadend = function (){
+                if (xhr.responseText == "true"){
+                    alert("投稿が成功しました.");
+                    document.querySelectorAll(".post")[0].style = "display: none";
+                    menu.style = "display: flex";
+                    res.Pages[title.value] = text.value;
+                    console.log(JSON.stringify(res));
+                }else{
+                    alert("投稿が失敗しました.");
+                }
+            }
+        });
+
+        read.addEventListener("click", () =>{
+            menu.style = "display: none";
+            list.style = "display: flex";
+            info = JSON.stringify(res.Pages);
+            info = info.replace("{", "");
+            info = info.replace("}", "");
+            console.log(info);
+            info = info.replace(",", "\n");
+            list.innerText = info;
+        });
+
+        name.addEventListener("click", () =>{
+            console.log("click");
+            menu.style = "display: flex";
+            list.style = "display: none";
+        });
+
+        setInterval(() =>{
+            console.log("setInterval Done");
+            if (info != JSON.stringify(res.Pages).replace("{", "").replace("}", "")){
+                info = JSON.stringify(res.Pages);
+                info = info.replace("{", "");
+                info = info.replace("}", "");
+                console.log(info);
+                while (info.includes(",")){
+                    info = info.replace(",", "\n");
+                }
+                list.innerText = info;
+            }
+        }, 500);
+    </script>
+</body>
+</html>

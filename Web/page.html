@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogPostService</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e6e6e6;
+        }
+        header {
+            padding: 30px 4% 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            z-index: 1000; /* Ensure header is on top of other content */
+        }
+        .h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+        }
+        a {	
+            text-decoration: none;
+            color: #4b4b4b;
+        }
+        nav {
+            margin-left: auto; /* Align nav to the right */
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0; /* Remove default padding */
+            display: flex;
+        }
+        li {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .SelectNav {
+            font-size: large;
+        }
+        main {
+            color: black;
+            max-width: 1020px;
+            margin-top: 100px; /* Adjust margin top to avoid overlap with header */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+        }
+        p{
+            font-size: large;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="title h1">
+            <a href="/" class="title">
+                BlogPostService
+            </a>
+        </h1>
+        <nav class="SelectNav">
+            <ul>
+                <li>
+                    <a href="/loginPage" class="SelectNav">Login</a>
+                </li>
+                <li>
+                    <a href="/signinPage" class="SelectNav">Signin</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div>
+            <h1 class="BlogTitle"></h1>
+            <p class="BlogText"></p>
+        </div>
+        <div style="display: flex;">
+            <button id="Good">Good</button><br>
+            <button id="Bad">Bad</button>
+        </div>
+    </main>
+    <script>
+        let url = new URL(location.href);
+        console.log(url);
+        let title = url.searchParams.get("title");
+        console.log(`Title: ${title}`);
+
+        const xhr = new XMLHttpRequest();
+        const getUrl = `https://${location.host}/read?title=${title}`;
+        console.log(getUrl);
+        xhr.open("GET", getUrl);
+        xhr.send();
+
+        xhr.onloadend = (() =>{
+            const res = JSON.parse(xhr.responseText);
+            console.log(JSON.stringify(res));
+
+            document.querySelectorAll(".BlogTitle")[0].innerText = res.title;
+            document.querySelectorAll(".BlogText")[0].innerText = res.Text;
+
+            document.querySelector("#Good").innerText = `Good: ${res.good}`;
+            document.querySelector("#Bad").innerText = `Bad: ${res.bad}`;
+        });
+
+        const good = document.querySelector("#Good");
+        const bad = document.querySelector("#Bad");
+
+        let evaluationUrl = `https://${location.host}/evaluation?title=${title}&evaluation=`;
+        good.addEventListener("click", () =>{
+            evaluationUrl +="good";
+            console.log(evaluationUrl);
+            xhr.open("GET", evaluationUrl);
+            xhr.send();
+            evaluationUrl = `https://${location.host}/evaluation?title=${title}&evaluation=`;
+            xhr.onloadend = (() =>{
+                location.reload();
+            });
+        });
+
+        bad.addEventListener("click", () =>{
+            evaluationUrl +="bad";
+            console.log(evaluationUrl);
+            xhr.open("GET", evaluationUrl);
+            xhr.send();
+            evaluationUrl = `https://${location.host}/evaluation?title=${title}&evaluation=`;
+            xhr.onloadend = (() =>{
+                console.log(xhr.responseText);
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>
