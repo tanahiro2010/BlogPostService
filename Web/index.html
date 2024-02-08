@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogPostService</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e6e6e6;
+        }
+        header {
+            padding: 30px 4% 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            z-index: 1000; /* Ensure header is on top of other content */
+        }
+        .h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+        }
+        a {	
+            text-decoration: none;
+            color: #4b4b4b;
+        }
+        nav {
+            margin-left: auto; /* Align nav to the right */
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0; /* Remove default padding */
+            display: flex;
+        }
+        li {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .SelectNav {
+            font-size: large;
+        }
+        main {
+            color: black;
+            max-width: 1020px;
+            margin-top: 100px; /* Adjust margin top to avoid overlap with header */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+        }
+        p{
+            font-size: large;
+        }
+        .list{
+            font-size: large;
+        }
+        .text{
+            display: flex;
+        }
+        .img{
+            width: 500px;
+            height: 250px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="title h1">
+            <a href="/" class="title">
+                BlogPostService
+            </a>
+        </h1>
+        <nav class="SelectNav">
+            <ul>
+                <li>
+                    <a href="/loginPage" class="SelectNav">Login</a>
+                </li>
+                <li>
+                    <a href="/signinPage" class="SelectNav">Signin</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>        
+        <div class="text">
+            <div>
+                <h1>Hello world!</h1>
+                    <p>
+                        あなたもブログを作ってみたいと思うことはありませんか？<br>
+                        このサイトは、サイト初心者専用のブログ投稿サービスです。<br>
+                    </p>
+                    <!--
+                        
+                    -->
+            </div>
+            <img src="https://cdn.pixabay.com/photo/2014/12/30/13/44/programming-583923_1280.jpg" alt="" class="img">
+        </div>
+        <div>
+            <p>現在投稿されているブログ</p>
+            <fieldset class="list">
+                
+            </fieldset>
+        </div>
+        <script>
+            const xhr = new XMLHttpRequest();
+            const url = `https://${location.host}/list`;
+
+            xhr.open("GET", url);
+            xhr.send();
+            xhr.onloadend = (() =>{
+                let res = JSON.parse(xhr.responseText);
+                console.log(res);
+                console.log(JSON.stringify(res));
+
+                let temp = "";
+                for (let item of res){
+                    console.log(JSON.stringify(item));
+                    const obj = Object.keys(item);
+                    const len = obj.length;
+                    console.log(obj, len);
+                    for (let i=0; i<len; i++){
+                        console.log(item[i]);
+                        temp +=`<a href="/page?title=${item[i].title}" class="temp" title="${item[i].title}">${item[i].title}</a><br>`;
+                    }
+                    console.log(temp);
+                }
+                console.log(temp);
+                document.querySelectorAll(".list")[0].innerHTML = temp;
+            });
+        </script>
+    </main>
+</body>
+</html>
